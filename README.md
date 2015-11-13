@@ -1,12 +1,10 @@
-# recover Monero address using the private spend key
+# Recover Monero address using the private spend key
 
 [Monero](https://getmonero.org/) `simplewallet` has a command called `spendkey` which prints
-your private spend key. However, its not clear what to do with this private key.
+out your private spend key. However, its not clear what to do with this private key.
 
 It turns out, that this private key is the hexadecimal representation of the 25 word
-mnemonic seed that the `simplewallet` gives you when you create the new wallet. For example
-
-The following mnemonic seed:
+mnemonic seed, which `simplewallet` gives you when you create a new wallet. For example, the following mnemonic seed:
 
 ```
 vinegar talent sorry hybrid ultimate template nimbly jukebox axes inactive veered toenail pride plotting chrome victim agnostic science bailed paddles wounded peaches king laptop king
@@ -19,7 +17,7 @@ corresponds to this private spend key:
 ```
 
 Since mnemonic seed always you to restore your deterministic wallet, the same thing can be done
-with just the private spend key. This includes your private view key.
+with just the private spend key. This includes recovery of your private view key.
 More on Monero's keys and addresses can be found on [Address Generation Tests](http://xmrtests.llcoins.net/addresstests.html) website.
 
 
@@ -33,7 +31,7 @@ are obtained directly from the corresponding private spend and view keys, respec
 The private view key is obtained from the private spend key (in `simplewallet`),
 which in turn can be obtained from the mnemonic seed. This means that
 spend key is much more important than the view key, since it allows
- to recover your private view key (revers is not true). So what it means, is that you shound not be disclosing your private spend key to strangers!
+ to recover your private view key (revers is not true). So what it means, is that you should not be disclosing your private spend key to strangers!
 
 
 
@@ -48,13 +46,14 @@ and [here](https://en.reddit.com/r/Monero/comments/3s80l2/why_mymonero_key_deriv
 Everything here was done and tested on
 Ubuntu 14.04 x86_64 and Ubuntu 15.10 x86_64.
 
-Monero source code compilation and setup are same as [here](http://moneroexamples.github.io/access-blockchain-in-cpp/).
+Monero source code compilation and setup are same as [here](https://github.com/moneroexamples/spendkey.git).
 
 # C++ code
 The most interesting C++ file is `main.cpp`.
 Therefore, I will present only that file here. Full source code is
-at [github](https://github.com/moneroexamples/access-blockchain-in-cpp). The hithub's version can
-also be slightly different than the code presented here, as it can be updated more frequently.
+at [github](https://github.com/moneroexamples/spendkey.git). The github's version can
+also be slightly different than the code presented here, as it might be updated
+more frequently.
 So for the latest version
 of this example, please check the github repository directly.
 
@@ -306,7 +305,7 @@ steps can be executed:
 
 ```bash
 # download the source code
-git clone https://github.com/moneroexamples/access-blockchain-in-cpp.git
+git clone https://github.com/moneroexamples/spendkey.git
 
 # enter the downloaded sourced code folder
 cd access-blockchain-in-cpp
