@@ -30,7 +30,7 @@ set(MONERO_LIBS_DIR
 
 # set location of moneroheaders
 set(MONERO_HEADERS_DIR
-        /opt/bitmonero-dev/bitmonero)
+        /opt/bitmonero-dev/headers)
 
 # include monero headers
 include_directories(
