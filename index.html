@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Monero Examples by moneroexamples</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Monero Examples</h1>
+      <h2 class="project-tagline">private-spend-key</h2>
+      <a href="https://github.com/moneroexamples/spendkey" class="btn">View on GitHub</a>
+      <a href="https://github.com/moneroexamples/spendkey/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/moneroexamples/spendkey/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="recover-monero-address-using-the-private-spend-key" class="anchor" href="#recover-monero-address-using-the-private-spend-key" aria-hidden="true"><span class="octicon octicon-link"></span></a>Recover Monero address using the private spend key</h1>
+
+<p><a href="https://getmonero.org/">Monero</a> <code>simplewallet</code> has a command called <code>spendkey</code> which prints
+out your private spend key. However, its not clear what to do with this private key.</p>
+
+<p>It turns out, that this private key is the hexadecimal representation of the 25 word
+mnemonic seed, which <code>simplewallet</code> gives you when you create a new wallet. For example, the following mnemonic seed:</p>
+
+<pre><code>vinegar talent sorry hybrid ultimate template nimbly jukebox axes inactive veered toenail pride plotting chrome victim agnostic science bailed paddles wounded peaches king laptop king
+</code></pre>
+
+<p>corresponds to this private spend key:</p>
+
+<pre><code>6ee02ef8647856f4080882a1ec4fabee19ec047ca24d3abb13c0ce589a46f702
+</code></pre>
+
+<p>Since mnemonic seed always you to restore your deterministic wallet, the same thing can be done
+with just the private spend key. This includes recovery of your private view key.
+More on Monero's keys and addresses can be found on <a href="http://xmrtests.llcoins.net/addresstests.html">Address Generation Tests</a> website.</p>
+
+<p>This example shows how to do this in C++ using Monero libraries.</p>
+
+<h1>
+<a id="monero-address" class="anchor" href="#monero-address" aria-hidden="true"><span class="octicon octicon-link"></span></a>Monero address</h1>
+
+<p>Monero address is as a combination of public spend and view keys. The public keys
+are obtained directly from the corresponding private spend and view keys, respectively.
+The private view key is obtained from the private spend key (in <code>simplewallet</code>),
+which in turn can be obtained from the mnemonic seed. This means that
+spend key is much more important than the view key, since it allows
+ to recover your private view key (revers is not true). So what it means, is that you should not be disclosing your private spend key to strangers!</p>
+
+<p>Please note that this is not the only way of deriving private keys. For example, <a href="https://mymonero.com/">MyMonero</a> is using a different procedure, which is not compatible with that in <code>simplewallet</code>. The procedure presented here is same as the one used in <code>simplewallet</code>. More on this is
+<a href="http://xmrtests.llcoins.net/addresstests.html">here</a>
+and <a href="https://en.reddit.com/r/Monero/comments/3s80l2/why_mymonero_key_derivation_is_different_than_for/">here</a>.</p>
+
+<h1>
+<a id="pre-requisites" class="anchor" href="#pre-requisites" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pre-requisites</h1>
+
+<p>Everything here was done and tested on
+Ubuntu 14.04 x86_64 and Ubuntu 15.10 x86_64.</p>
+
+<p>Monero source code compilation and setup are same as <a href="https://github.com/moneroexamples/spendkey.git">here</a>.</p>
+
+<h1>
+<a id="c-code" class="anchor" href="#c-code" aria-hidden="true"><span class="octicon octicon-link"></span></a>C++ code</h1>
+
+<p>The most interesting C++ file is <code>main.cpp</code>.
+Therefore, I will present only that file here. Full source code is
+at <a href="https://github.com/moneroexamples/spendkey.git">github</a>. The github's version can
+also be slightly different than the code presented here, as it might be updated
+more frequently.
+So for the latest version
+of this example, please check the github repository directly.</p>
+
+<h2>
+<a id="maincpp" class="anchor" href="#maincpp" aria-hidden="true"><span class="octicon octicon-link"></span></a>main.cpp</h2>
+
+<p>This is the main file of the example. The program takes
+two input arguments:</p>
+
+<ul>
+<li>
+<code>spendkey,s</code> - the private spend key.</li>
+<li>
+<code>mnemonic,m</code> - 25 word mnemonic representation of the spend key.</li>
+</ul>
+
+<div class="highlight highlight-source-c++"><pre>#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">"</span>src/CmdLineOptions.h<span class="pl-pds">"</span></span>
+#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">"</span>src/tools.h<span class="pl-pds">"</span></span>
+
+#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">"</span>mnemonics/electrum-words.h<span class="pl-pds">"</span></span>
+
+
+<span class="pl-k">using</span> crypto::ElectrumWords::words_to_bytes;
+<span class="pl-k">using</span> crypto::ElectrumWords::bytes_to_words;
+
+<span class="pl-k">using</span> xmreg::<span class="pl-k">operator</span>&lt;&lt;;
+
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
+
+<span class="pl-k">unsigned</span> <span class="pl-k">int</span> epee::g_test_dbg_lock_sleep = <span class="pl-c1">0</span>;
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>(<span class="pl-k">int</span> ac, <span class="pl-k">const</span> <span class="pl-k">char</span>* av[]) {
+
+    <span class="pl-c">// get command line options</span>
+    xmreg::CmdLineOptions opts {ac, av};
+
+    <span class="pl-c">// if help was chosen, display help text and finish</span>
+    <span class="pl-k">if</span> (opts.<span class="pl-c1">help_requested</span>())
+    {
+        <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+    }
+
+    <span class="pl-c">// default language for the mnemonic</span>
+    <span class="pl-c">// representation of the private spend key</span>
+    string language {<span class="pl-s"><span class="pl-pds">"</span>English<span class="pl-pds">"</span></span>};
+
+    <span class="pl-c">// get private spend key options</span>
+    <span class="pl-k">auto</span> spendkey_opt = opts.<span class="pl-smi">get_option</span>&lt;string&gt;(<span class="pl-s"><span class="pl-pds">"</span>spendkey<span class="pl-pds">"</span></span>);
+    <span class="pl-k">auto</span> mnemonic_opt = opts.<span class="pl-smi">get_option</span>&lt;string&gt;(<span class="pl-s"><span class="pl-pds">"</span>mnemonic<span class="pl-pds">"</span></span>);
+
+    <span class="pl-c">// get the program command line options, or</span>
+    <span class="pl-c">// some default values for quick check</span>
+    string spendkey_str = spendkey_opt ? *spendkey_opt : <span class="pl-s"><span class="pl-pds">"</span>af6082af29108abda69cc385dfed2102b892a871695367cb22a4b9b6df8b3206<span class="pl-pds">"</span></span>;
+    string mnemonic_str = mnemonic_opt ? *mnemonic_opt : <span class="pl-s"><span class="pl-pds">"</span>spout midst duckling tepid odds glass enhanced avatar ocean rarest eavesdrop egotistic oxygen trying future airport session nanny tedious guru asylum superior cement cunning eavesdrop<span class="pl-pds">"</span></span>;
+
+
+    crypto::secret_key private_spend_key;
+
+
+    <span class="pl-k">if</span> ((spendkey_opt &amp;&amp; !mnemonic_opt) || (!spendkey_opt &amp;&amp; !mnemonic_opt))
+    {
+        <span class="pl-c">// if spend key is given or nothing is provided by the user,</span>
+        <span class="pl-c">// then derive the mnemonic using either key provided or the default one</span>
+
+        <span class="pl-k">if</span> (spendkey_opt)
+        {
+            <span class="pl-c">// use provided spend key by the user</span>
+            spendkey_str = *spendkey_opt;
+        }
+
+        <span class="pl-c">// parse string representing given private spend key</span>
+        <span class="pl-k">if</span> (!<span class="pl-c1">xmreg::parse_str_secret_key</span>(spendkey_str, private_spend_key))
+        {
+            cerr &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Cant parse the spend key: <span class="pl-pds">"</span></span> &lt;&lt; spendkey_str &lt;&lt; endl;
+            <span class="pl-k">return</span> <span class="pl-c1">1</span>;
+        }
+
+        <span class="pl-c">// derive the mnemonic version of the spend key.</span>
+        <span class="pl-c">// 25 word mnemonic that is provided by the simplewallet</span>
+        <span class="pl-c">// is just a word representation of the private spend key</span>
+        <span class="pl-k">if</span> (!<span class="pl-c1">bytes_to_words</span>(private_spend_key, mnemonic_str, language))
+        {
+            cerr &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span>Cant create the mnemonic for the private spend key: <span class="pl-pds">"</span></span>
+                 &lt;&lt; private_spend_key &lt;&lt; endl;
+            <span class="pl-k">return</span> <span class="pl-c1">1</span>;
+        }
+    }
+    <span class="pl-k">else</span> <span class="pl-k">if</span> (!spendkey_opt &amp;&amp; mnemonic_opt)
+    {
+        <span class="pl-c">// if mnemonic is given, then derive the spend key</span>
+        <span class="pl-k">if</span> (!<span class="pl-c1">words_to_bytes</span>(*mnemonic_opt, private_spend_key, language))
+        {
+            cerr &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span>Cant create private spend key for the mnemonic: <span class="pl-pds">"</span></span>
+                 &lt;&lt; *mnemonic_opt &lt;&lt; endl;
+            <span class="pl-k">return</span> <span class="pl-c1">1</span>;
+        }
+    }
+
+
+    cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>
+         &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Mnemonic: <span class="pl-pds">"</span></span> &lt;&lt; mnemonic_str &lt;&lt; endl;
+
+    <span class="pl-c">// the seed for generation of private view key later on</span>
+    <span class="pl-c">// is the private spend key.</span>
+    cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>
+         &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Hexadecimal seed : <span class="pl-pds">"</span></span> &lt;&lt; private_spend_key &lt;&lt; endl;
+
+
+    cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>
+         &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Private spend key: <span class="pl-pds">"</span></span> &lt;&lt; private_spend_key &lt;&lt; endl;
+
+
+    <span class="pl-c">// we have private_spend_key, so now</span>
+    <span class="pl-c">// we need to get the corresponding</span>
+    <span class="pl-c">// public_spend_key</span>
+    crypto::public_key public_spend_key;
+
+
+    <span class="pl-c">// generate public key based on the private key</span>
+    <span class="pl-c1">crypto::secret_key_to_public_key</span>(private_spend_key, public_spend_key);
+
+
+    cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Public spend key : <span class="pl-pds">"</span></span>  &lt;&lt; public_spend_key  &lt;&lt; endl;
+
+
+    <span class="pl-c">// now its time to get the view keys.</span>
+    <span class="pl-c">// in monero's simplewallet, the private view key</span>
+    <span class="pl-c">// is generated using keccak hash of the private spend</span>
+    <span class="pl-c">// key. in other words, the hash of the private spend key</span>
+    <span class="pl-c">// is used for generating the private view key,</span>
+    <span class="pl-c">// and subsequently, its corresponding public view key.</span>
+
+
+    crypto::hash hash_of_private_spend_key;
+
+    <span class="pl-c">// calculate keccak hash of the private spend key</span>
+    <span class="pl-c1">xmreg::keccak_hash</span>(private_spend_key, hash_of_private_spend_key);
+
+
+    crypto::secret_key private_view_key;
+    crypto::public_key public_view_key;
+
+    <span class="pl-c">// get the view keys using the hash_of_private_spend_key</span>
+    <span class="pl-c">// as the seed.</span>
+    <span class="pl-c1">crypto::generate_keys</span>(public_view_key, private_view_key,
+                          xmreg::get_key_from_hash&lt;crypto::secret_key&gt;(hash_of_private_spend_key),
+                          <span class="pl-c1">true</span> <span class="pl-c">/* recover keys*/</span>);
+
+
+    cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>
+         &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Private view key : <span class="pl-pds">"</span></span>  &lt;&lt; private_view_key &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>
+         &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Public view key  : <span class="pl-pds">"</span></span>  &lt;&lt; public_view_key  &lt;&lt; endl;
+
+
+    <span class="pl-c">// once we have both private view and spend keys, we can get our</span>
+    <span class="pl-c">// address. Monero's address is a combination of the two</span>
+    <span class="pl-c">// public keys.</span>
+    cryptonote::account_public_address address {public_spend_key, public_view_key};
+
+
+    cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>
+         &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Monero address   : <span class="pl-pds">"</span></span>  &lt;&lt; address &lt;&lt; endl;
+
+    cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>
+         &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>End of program.<span class="pl-pds">"</span></span> &lt;&lt; endl;
+
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+
+<h1>
+<a id="output-example-1" class="anchor" href="#output-example-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Output example 1</h1>
+
+<p>Executing the program as follows:</p>
+
+<div class="highlight highlight-source-shell"><pre>./spendkey</pre></div>
+
+<p>Results in the following output:</p>
+
+<div class="highlight highlight-source-shell"><pre>Mnemonic: spout midst duckling tepid odds glass enhanced avatar ocean rarest eavesdrop egotistic oxygen trying future airport session nanny tedious guru asylum superior cement cunning eavesdropspout midst duckling tepid odds glass enhanced avatar ocean rarest eavesdrop egotistic oxygen trying future airport session nanny tedious guru asylum superior cement cunning eavesdrop
+
+Hexadecimal seed <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>af6082af29108abda69cc385dfed2102b892a871695367cb22a4b9b6df8b<span class="pl-k">3206&gt;</span>
+
+Private spend key: <span class="pl-k">&lt;</span>af6082af29108abda69cc385dfed2102b892a871695367cb22a4b9b6df8b<span class="pl-k">3206&gt;</span>
+Public spend key <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>7aff30fbdc005ecb03f57a11e250e0d665621ffde1d44c6aa84a8212cc0d<span class="pl-k">1236&gt;</span>
+
+Private view key <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>157874dc4e2961c872f87aaf4346146d0f596e2f116a51fbac01b693a8e3020a<span class="pl-k">&gt;</span>
+Public view key  <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>25c1b6920540fbcfcb0e36bd2c88f5c1e62e5ef1d621279e7230b47648e64a<span class="pl-k">63&gt;</span>
+
+Monero address   <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>46HSxE7KoiDaxWFWR1wmJfcrunNj4TLiPJqiCJkQn345A4JJzgBNhUvbkrYWJX4EVJZS4kJGfGj7CTW8GEUHsbEZCEupMt<span class="pl-k">6&gt;</span></pre></div>
+
+<p>These results agree with those obtained using
+ <a href="http://xmrtests.llcoins.net/addresstests.html">Address Generation Tests</a> website.</p>
+
+<h1>
+<a id="output-example-2" class="anchor" href="#output-example-2" aria-hidden="true"><span class="octicon octicon-link"></span></a>Output example 2</h1>
+
+<p>Executing the program as follows:</p>
+
+<div class="highlight highlight-source-shell"><pre>./spendkey -s 11830f8a232b7b0152a709340bb653357d2aa92985f83b6e0dcf7cb2bf11330d</pre></div>
+
+<p>Results in the following output:</p>
+
+<div class="highlight highlight-source-shell"><pre>Mnemonic: spout midst duckling tepid odds glass enhanced avatar ocean rarest eavesdrop egotistic oxygen trying future airport session nanny tedious guru asylum superior cement cunning eavesdropsiblings together icing idols sovereign sprig suture aloof egotistic speedy diplomat impel wise glass long cafe perfect awakened ought enforce voted mime fight goggles egotistic
+
+Hexadecimal seed <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>11830f8a232b7b0152a709340bb653357d2aa92985f83b6e0dcf7cb2bf11330d<span class="pl-k">&gt;</span>
+
+Private spend key: <span class="pl-k">&lt;</span>11830f8a232b7b0152a709340bb653357d2aa92985f83b6e0dcf7cb2bf11330d<span class="pl-k">&gt;</span>
+Public spend key <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>269e626955fe97f3853d768e0ad02bf92d0a95a8c03704fd8a96d5ad6a38c42a<span class="pl-k">&gt;</span>
+
+Private view key <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>21e63fb10d4adad609a327395e42d737bbd772dce53d64d2733c4aacc69eb<span class="pl-k">300&gt;</span>
+Public view key  <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>b4e0cf1d4c7c60b590081db50e877e7576a36fb2c257f5f94932222d23d34b<span class="pl-k">36&gt;</span>
+
+Monero address   <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>435zP7PmQwYhjTJu7AmU8SigKVMsY9j3yjQfnwnfjRZM89Jp2ZxEpsyXNPKkr5hfwBLeYTiZeqfaLihPNWWEzbgN77gqFHp<span class="pl-k">&gt;</span></pre></div>
+
+<p>These results also agree with those obtained using
+ <a href="http://xmrtests.llcoins.net/addresstests.html">Address Generation Tests</a> website.</p>
+
+<h1>
+<a id="output-example-3" class="anchor" href="#output-example-3" aria-hidden="true"><span class="octicon octicon-link"></span></a>Output example 3</h1>
+
+<p>Executing the program as follows:</p>
+
+<div class="highlight highlight-source-shell"><pre>./spendkey -m <span class="pl-s"><span class="pl-pds">"</span>essential future brunt cajun upper ammo incur smelting usual tyrant tattoo virtual long hectare idols guarded blender usage ghost sample eagle shelter does dozen usage<span class="pl-pds">"</span></span>
+</pre></div>
+
+<p>Results in the following output:</p>
+
+<div class="highlight highlight-source-shell"><pre>Mnemonic: essential future brunt cajun upper ammo incur smelting usual tyrant tattoo virtual long hectare idols guarded blender usage ghost sample eagle shelter does dozen usage
+
+Hexadecimal seed <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>0a0214cf7716292246d277214830411b20d3cd08cd119dcd9e149d7bd1151e<span class="pl-k">02&gt;</span>
+
+Private spend key: <span class="pl-k">&lt;</span>0a0214cf7716292246d277214830411b20d3cd08cd119dcd9e149d7bd1151e<span class="pl-k">02&gt;</span>
+Public spend key <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>7e9f73449c1b3a9a83c25a641a95c8f74f7ccd309dd3fba5222ce349052af<span class="pl-k">567&gt;</span>
+
+Private view key <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>bd613fbad795df25b8218a7e4f80f4e3158db0646d1cb7d22d84f0b603a0f60b<span class="pl-k">&gt;</span>
+Public view key  <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>fad7d278ee9fedf0034da1812115c5a369d6bd67e1b076afbc4aee579a609ce<span class="pl-k">3&gt;</span>
+
+Monero address   <span class="pl-c1">:</span> <span class="pl-k">&lt;</span>46RRCV68frZSqzBsh9TWf9iNDrYhPkABUUd16zFLoPECJPjd3AtuTyeh9RhSWAqiCLULKGf9SC1UHWPra64ykRiTSg3RPmW<span class="pl-k">&gt;</span></pre></div>
+
+<p>These results also agree with those obtained using
+ <a href="http://xmrtests.llcoins.net/addresstests.html">Address Generation Tests</a> website.</p>
+
+<h2>
+<a id="compile-this-example" class="anchor" href="#compile-this-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compile this example</h2>
+
+<p>The dependencies are same as those for Monero, so I assume Monero compiles
+correctly. If so then to download and compile this example, the following
+steps can be executed:</p>
+
+<div class="highlight highlight-source-shell"><pre><span class="pl-c"># download the source code</span>
+git clone https://github.com/moneroexamples/spendkey.git
+
+<span class="pl-c"># enter the downloaded sourced code folder</span>
+<span class="pl-c1">cd</span> access-blockchain-in-cpp
+
+<span class="pl-c"># create the makefile</span>
+cmake <span class="pl-c1">.</span>
+
+<span class="pl-c"># compile</span>
+make</pre></div>
+
+<p>After this, <code>spendkey</code> executable file should be present in access-blockchain-in-cpp
+folder. How to use it, can be seen in the above example outputs.</p>
+
+<h2>
+<a id="how-can-you-help" class="anchor" href="#how-can-you-help" aria-hidden="true"><span class="octicon octicon-link"></span></a>How can you help?</h2>
+
+<p>Constructive criticism, code and website edits are always good. They can be made through github.</p>
+
+<p>Some Monero are also welcome:</p>
+
+<pre><code>48daf1rG3hE1Txapcsxh6WXNe9MLNKtu7W7tKTivtSoVLHErYzvdcpea2nSTgGkz66RFP4GKVAsTV14v6G3oddBTHfxP6tU
+</code></pre>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/moneroexamples/spendkey">Monero Examples</a> is maintained by <a href="https://github.com/moneroexamples">moneroexamples</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
