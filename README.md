@@ -46,7 +46,7 @@ and [here](https://en.reddit.com/r/Monero/comments/3s80l2/why_mymonero_key_deriv
 Everything here was done and tested on
 Ubuntu 14.04 x86_64 and Ubuntu 15.10 x86_64.
 
-Monero source code compilation and setup are same as [here](https://github.com/moneroexamples/spendkey.git).
+Monero source code compilation and setup are same as [here](http://moneroexamples.github.io/access-blockchain-in-cpp/).
 
 # C++ code
 The most interesting C++ file is `main.cpp`.
@@ -308,7 +308,7 @@ steps can be executed:
 git clone https://github.com/moneroexamples/spendkey.git
 
 # enter the downloaded sourced code folder
-cd access-blockchain-in-cpp
+cd spendkey
 
 # create the makefile
 cmake .
