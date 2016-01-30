@@ -18,10 +18,9 @@ corresponds to this private spend key:
 
 Since mnemonic seed always you to restore your deterministic wallet, the same thing can be done
 with just the private spend key. This includes recovery of your private view key.
+
 More on Monero's keys and addresses can be found on [Address Generation Tests](http://xmrtests.llcoins.net/addresstests.html) website.
 
-
-This example shows how to do this in C++ using Monero libraries.
 
 
 # Monero address
@@ -40,13 +39,12 @@ spend key is much more important than the view key, since it allows
 and [here](https://en.reddit.com/r/Monero/comments/3s80l2/why_mymonero_key_derivation_is_different_than_for/).
 
 
-
 # Pre-requisites
 
-Everything here was done and tested on
-Ubuntu 14.04 x86_64 and Ubuntu 15.10 x86_64.
+The example was prepared and tested on Xubuntu 15.10 x64 and Monero 0.9.
 
-Monero source code compilation and setup are same as [here](http://moneroexamples.github.io/access-blockchain-in-cpp/).
+Instruction for Monero 0.9 compilation and setup of Monero's header files and libraries are at:
+ - [Compile Monero 0.9 on Ubuntu 15.10 and 14.04 x64](https://github.com/moneroexamples/compile-monero-09-on-ubuntu)
 
 # C++ code
 The most interesting C++ file is `main.cpp`.
@@ -56,7 +54,6 @@ also be slightly different than the code presented here, as it might be updated
 more frequently.
 So for the latest version
 of this example, please check the github repository directly.
-
 
 ## main.cpp
 This is the main file of the example. The program takes
@@ -319,7 +316,6 @@ make
 
 After this, `spendkey` executable file should be present in access-blockchain-in-cpp
 folder. How to use it, can be seen in the above example outputs.
-
 
 ## How can you help?
 
