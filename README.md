@@ -16,7 +16,7 @@ corresponds to this private spend key:
 6ee02ef8647856f4080882a1ec4fabee19ec047ca24d3abb13c0ce589a46f702
 ```
 
-Since mnemonic seed allows you to restore a deterministic, `simplewallet`. The same thing can be done
+Since mnemonic seed allows you to restore deterministic `simplewallet` wallet address. The same thing can be done
 with just the private spend key. This includes recovery of your private view key.
 
 More on Monero's keys and addresses can be found on [Address Generation Tests](http://xmrtests.llcoins.net/addresstests.html) website.
