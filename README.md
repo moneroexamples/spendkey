@@ -16,7 +16,7 @@ corresponds to this private spend key:
 6ee02ef8647856f4080882a1ec4fabee19ec047ca24d3abb13c0ce589a46f702
 ```
 
-Since mnemonic seed always you to restore your deterministic wallet, the same thing can be done
+Since mnemonic seed allows you to restore a deterministic, `simplewallet`. The same thing can be done
 with just the private spend key. This includes recovery of your private view key.
 
 More on Monero's keys and addresses can be found on [Address Generation Tests](http://xmrtests.llcoins.net/addresstests.html) website.
@@ -41,10 +41,10 @@ and [here](https://en.reddit.com/r/Monero/comments/3s80l2/why_mymonero_key_deriv
 
 # Pre-requisites
 
-The example was prepared and tested on Xubuntu 15.10 x64 and Monero 0.9.
+The example was tested on Ubuntu 16.04 x64 and Monero 0.9.
 
 Instruction for Monero 0.9 compilation and setup of Monero's header files and libraries are at:
- - [Compile Monero 0.9 on Ubuntu 15.10 and 14.04 x64](https://github.com/moneroexamples/compile-monero-09-on-ubuntu)
+ - [Compile Monero 0.9 on Ubuntu 16.04](https://github.com/moneroexamples/compile-monero-09-on-ubuntu-16-04)
 
 # C++ code
 The most interesting C++ file is `main.cpp`.
@@ -64,21 +64,6 @@ two input arguments:
 
 
 ```c++
-#include "src/CmdLineOptions.h"
-#include "src/tools.h"
-
-#include "mnemonics/electrum-words.h"
-
-
-using crypto::ElectrumWords::words_to_bytes;
-using crypto::ElectrumWords::bytes_to_words;
-
-using xmreg::operator<<;
-
-using namespace std;
-
-unsigned int epee::g_test_dbg_lock_sleep = 0;
-
 int main(int ac, const char* av[]) {
 
     // get command line options
@@ -314,12 +299,12 @@ cmake .
 make
 ```
 
-After this, `spendkey` executable file should be present in access-blockchain-in-cpp
-folder. How to use it, can be seen in the above example outputs.
+After this, `spendkey` executable file should be present in spendkey
+folder.
 
 ## How can you help?
 
-Constructive criticism, code and website edits are always good. They can be made through github.
+Constructive criticism, code and website edits are always welcome. They can be made through github.
 
 Some Monero are also welcome:
 ```
