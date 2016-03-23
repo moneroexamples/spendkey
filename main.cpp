@@ -11,7 +11,10 @@ using xmreg::operator<<;
 
 using namespace std;
 
-unsigned int epee::g_test_dbg_lock_sleep = 0;
+namespace epee
+{
+    unsigned int g_test_dbg_lock_sleep = 0;
+}
 
 int main(int ac, const char* av[]) {
 
