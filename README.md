@@ -19,7 +19,7 @@ corresponds to this private spend key:
 Since mnemonic seed allows you to restore deterministic `simplewallet` wallet address. The same thing can be done
 with just the private spend key. This includes recovery of your private view key.
 
-More on Monero's keys and addresses can be found on [Address Generation Tests](http://xmrtests.llcoins.net/addresstests.html) website.
+More on Monero's keys and addresses can be found on [Address Generation Tests](https://xmr.llcoins.net/) website.
 
 
 
@@ -35,7 +35,7 @@ spend key is much more important than the view key, since it allows
 
 
  Please note that this is not the only way of deriving private keys. For example, [MyMonero](https://mymonero.com/) is using a different procedure, which is not compatible with that in `simplewallet`. The procedure presented here is same as the one used in `simplewallet`. More on this is
-[here](http://xmrtests.llcoins.net/addresstests.html)
+[here](https://xmr.llcoins.net/)
 and [here](https://en.reddit.com/r/Monero/comments/3s80l2/why_mymonero_key_derivation_is_different_than_for/).
 
 
@@ -226,7 +226,7 @@ Public view key  : <25c1b6920540fbcfcb0e36bd2c88f5c1e62e5ef1d621279e7230b47648e6
 Monero address   : <46HSxE7KoiDaxWFWR1wmJfcrunNj4TLiPJqiCJkQn345A4JJzgBNhUvbkrYWJX4EVJZS4kJGfGj7CTW8GEUHsbEZCEupMt6>
 ```
 These results agree with those obtained using
- [Address Generation Tests](http://xmrtests.llcoins.net/addresstests.html) website.
+ [Address Generation Tests](https://xmr.llcoins.net/) website.
 
 # Output example 2
 
@@ -252,7 +252,7 @@ Monero address   : <435zP7PmQwYhjTJu7AmU8SigKVMsY9j3yjQfnwnfjRZM89Jp2ZxEpsyXNPKk
 ```
 
 These results also agree with those obtained using
- [Address Generation Tests](http://xmrtests.llcoins.net/addresstests.html) website.
+ [Address Generation Tests](https://xmr.llcoins.net/) website.
 
 # Output example 3
 Executing the program as follows:
@@ -277,7 +277,7 @@ Monero address   : <46RRCV68frZSqzBsh9TWf9iNDrYhPkABUUd16zFLoPECJPjd3AtuTyeh9RhS
 ```
 
 These results also agree with those obtained using
- [Address Generation Tests](http://xmrtests.llcoins.net/addresstests.html) website.
+ [Address Generation Tests](https://xmr.llcoins.net/) website.
 
 
 ## Compile this example
