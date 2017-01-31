@@ -11,11 +11,6 @@ using xmreg::operator<<;
 
 using namespace std;
 
-namespace epee
-{
-    unsigned int g_test_dbg_lock_sleep = 0;
-}
-
 int main(int ac, const char* av[]) {
 
     // get command line options
@@ -26,6 +21,10 @@ int main(int ac, const char* av[]) {
     {
         return 0;
     }
+
+    // set  monero log output level
+    uint32_t log_level = 0;
+    mlog_configure("", true);
 
     // default language for the mnemonic
     // representation of the private spend key
